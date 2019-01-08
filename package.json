@@ -1,0 +1,26 @@
+{
+  "name": "glam-polona",
+  "version": "1.0.0",
+  "description": "Tool for parsing data from Polona.pl to CSV",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Paweł Marynowski (yarl@o2.pl)",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-eslint": "8",
+    "eslint": "4.x",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-prettier": "^3.3.0",
+    "eslint-loader": "^2.1.0",
+    "eslint-plugin-import": "^2.13.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-prettier": "^2.6.2",
+    "eslint-plugin-react": "^7.11.1"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "json2csv": "^4.3.2"
+  }
+}
