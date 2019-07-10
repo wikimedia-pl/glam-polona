@@ -7,12 +7,31 @@ const readFile = util.promisify(fs.readFile);
 const { log } = semlog;
 
 /**
+ * Checks if title is longer than 240 bytes required by MediaWiki
+ * 225 = 240 - 15 for id and extension
+ * @param {string} title
+ */
+function isTitleTooLong(title) {
+  return new util.TextEncoder("utf-8").encode(title).length > 225;
+}
+
+function shortenTitle(title) {
+  const newTitle = `${title.substring(0, title.lastIndexOf(" "))}...`;
+  return isTitleTooLong(newTitle) ? shortenTitle(newTitle) : newTitle;
+}
+
+/**
  * Removes chars forbidden in MediaWiki file title
  * @param {string} title
  */
 function convertToMediaWikiTitle(title) {
-  // eslint-disable-next-line no-useless-escape
-  return title.replace(/[\[\]{}\|#<>%\+\?]/gi, "");
+  const escapedTitle = title
+    .replace(/[\[\]{}\|#<>%\+\?]/gi, "") // eslint-disable-line no-useless-escape
+    .replace(/( : |: | = )/g, " - ")
+    .replace(/:/g, "-");
+  return isTitleTooLong(escapedTitle)
+    ? shortenTitle(escapedTitle)
+    : escapedTitle;
 }
 
 /**
@@ -74,8 +93,8 @@ async function fetchData(identifier) {
           catalogue_url
         });
       })
-      .catch(error => {
-        log(error);
+      .catch(() => {
+        log("error");
         resolve({});
       });
   });
@@ -92,38 +111,38 @@ async function readInputFile(fileName) {
 
 function wikify(data) {
   return `=={{int:filedesc}}==
-  {{Book
-   |Author = ${data.creator_name || ""}
-   |Translator = 
-   |Editor = 
-   |Illustrator = 
-   |Title = ${data.title || ""}
-   |Subtitle = 
-   |Series title = 
-   |Volume = 
-   |Edition = 
-   |Publisher = ${data.publisher || ""}${
+{{Book
+  |Author = ${data.creator_name || ""}
+  |Translator = 
+  |Editor = 
+  |Illustrator = 
+  |Title = ${data.title || ""}
+  |Subtitle = 
+  |Series title = 
+  |Volume = 
+  |Edition = 
+  |Publisher = ${data.publisher || ""}${
     data.publisher && data.imprint ? "<br />" : ""
   }${data.imprint ? "Imprint: " : ""}${data.imprint}
-   |Printer = 
-   |Date = ${data.date_descriptive || ""}
-   |Description = {{pl|${data.physical_description}}}${
+  |Printer = 
+  |Date = ${data.date_descriptive || ""}
+  |Description = {{pl|${data.physical_description}}}${
     data.notes ? "\n\n" : ""
   }${
     data.notes && data.notes.length
       ? data.notes.map(note => `{{pl|${note}}}`).join("\n\n")
       : ""
   }
-   |Source = https://polona.pl/item/${data.academica_id}/0
-   |Institution = {{Institution:National Library, Warsaw}} ${
-     data.digital_copy_by
-   }
-  }}
-  
-  =={{int:license-header}}==
-  {{PD-old-auto}}
-  {{National Library in Warsaw partnership}}
-  {{Uncategorized-Polona|year={{subst:CURRENTYEAR}}|month={{subst:CURRENTMONTHNAME}}|day={{subst:CURRENTDAY}}}}`;
+  |Source = https://polona.pl/item/${data.academica_id}/0
+  |Institution = {{Institution:National Library, Warsaw}} ${
+    data.digital_copy_by
+  }
+}}
+
+=={{int:license-header}}==
+{{PD-old-auto}}
+{{National Library in Warsaw partnership}}
+{{Uncategorized-Polona|year={{subst:CURRENTYEAR}}|month={{subst:CURRENTMONTHNAME}}|day={{subst:CURRENTDAY}}}}`;
 }
 
 module.exports = { fetchData, log, readInputFile, wikify };
