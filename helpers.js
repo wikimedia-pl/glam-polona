@@ -140,7 +140,7 @@ function wikify(data) {
 }}
 
 =={{int:license-header}}==
-{{PD-old-auto}}
+{{PD-old-70}}
 {{National Library in Warsaw partnership}}
 {{Uncategorized-Polona|year={{subst:CURRENTYEAR}}|month={{subst:CURRENTMONTHNAME}}|day={{subst:CURRENTDAY}}}}`;
 }
